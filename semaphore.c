@@ -11,7 +11,7 @@
 
 // set the maximum threads to count and initialize anything you need
 void initsema(struct semaphore *lk, int count){
-	initsleeplock(lk->sleeplock, "semaphore");
+	initsleeplock(&lk->lock, "semaphore");
     lk->max = count;
     lk->open = count;
     lk->head = 0;
@@ -26,13 +26,13 @@ int downsema(struct semaphore *lk){
     cur_proc = myproc();
 
     // modify semaphore head
-    acquiresleep(lk->sleeplock);
+    acquiresleep(&lk->lock);
     cur_proc->next = lk->head;
     lk->head = cur_proc;
-    if(!holdingsleep(lk->sleeplock)){
+    if(!holdingsleep(&lk->lock)){
     	panic("semaphore LL edit without sleeplock");
     }
-    releasesleep(lk->sleeplock);
+    releasesleep(&lk->lock);
 
     // check whether there are enough spaces
     while(current_place > lk->max){
@@ -53,7 +53,7 @@ int upsema(struct semaphore *lk){
 	cur_proc = myproc();
 
 	// modify the proc linked list
-    acquiresleep(lk->sleeplock);
+    acquiresleep(&lk->lock);
     temp = lk->head;
     pre_cur = 0;
     while(temp != 0){
@@ -66,10 +66,10 @@ int upsema(struct semaphore *lk){
     }
     // remove cur_proc from the linked list
     pre_cur->next = cur_proc->next;
-    if(!holdingsleep(lk->sleeplock)){
+    if(!holdingsleep(&lk->lock)){
     	panic("semaphore LL edit without sleeplock");
     }
-    releasesleep(lk->sleeplock);
+    releasesleep(&lk->lock);
 
     return (remaining + 1);
 }
