@@ -43,7 +43,7 @@ int downsema(struct semaphore *lk){
        	  current_place++;
         }
     }
-    return (lk->max - current_place + 1);
+    return (lk->max - current_place);
 }
 
 // Similar with releasing the lock. Return the number of remained threads that can access the section.
