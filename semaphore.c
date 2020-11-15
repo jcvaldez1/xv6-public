@@ -53,7 +53,7 @@ int upsema(struct semaphore *lk){
 	cur_proc = myproc();
 
 	// modify the proc linked list
-    acquiresleeplock(lk->sleeplock);
+    acquiresleep(lk->sleeplock);
     temp = lk->head;
     pre_cur = 0;
     while(temp != 0){
