@@ -26,7 +26,7 @@ int downsema(struct semaphore *lk){
     cur_proc = myproc();
 
     // modify semaphore head
-    acquiresleeplock(lk->sleeplock);
+    acquiresleep(lk->sleeplock);
     cur_proc->next = lk->head;
     lk->head = cur_proc;
     if(!holdingsleep(lk->sleeplock)){
@@ -55,12 +55,15 @@ int upsema(struct semaphore *lk){
 	// modify the proc linked list
     acquiresleeplock(lk->sleeplock);
     temp = lk->head;
+    pre_cur = 0;
     while(temp != 0){
     	if(temp->next == cur_proc) pre_cur = temp;
     	temp = temp->next;
     	if(remaining > 0) remaining--;
     }
-
+    if(pre_cur == 0){
+    	panic("cur_proc not found in LL");
+    }
     // remove cur_proc from the linked list
     pre_cur->next = cur_proc->next;
     if(!holdingsleep(lk->sleeplock)){
