@@ -35,10 +35,10 @@ int downsema(struct semaphore *lk){
     releasesleep(lk->sleeplock);
 
     // check whether there are enough spaces
-    while(current_place >= lk->max){
+    while(current_place > lk->max){
     	current_place = 0;
         temp = cur_proc;
-        while(temp != 0 && current_place < lk->max){
+        while(temp != 0 && current_place <= lk->max){
        	  temp = temp->next;
        	  current_place++;
         }
