@@ -1,3 +1,4 @@
+#include "rwsemaphore.h"
 // set the maximum threads to count and initialize anything you need
 void initrwsema(struct rwsemaphore *lk){
     return 1;
