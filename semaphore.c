@@ -1,4 +1,5 @@
 #include "semaphore.h"
+#include "params.h"
 #include "defs.h"
 #include "sleeplock.h"
 
