@@ -1,4 +1,6 @@
 struct semaphore {
-  struct cpu *cpu;   // The cpu holding the lock.
-  int count;		 // Max amount of threads
+  struct proc *head;            // head proc pointer
+  struct sleeplock *sleeplock; // sleeplock for editing value
+  int max;		                // Max amount of threads
+  int open;                     // current amount of threads open
 };
