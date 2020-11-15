@@ -186,5 +186,17 @@ void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 
+// semaphore.c
+void            initsema(struct semaphore *lk, int count);
+int             downsema(struct semaphore *lk);
+int             upsema(struct semaphore *lk);
+
+// rwsemaphore.c
+void            initrwsema(struct rwsemaphore *lk);
+int             downreadsema(struct rwsemaphore *lk);
+int             upreadsema(struct rwsemaphore *lk);
+int             downwritesema(struct rwsemaphore *lk);
+int             upwritesema(struct rwsemaphore *lk);
+
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
