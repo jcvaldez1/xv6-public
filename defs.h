@@ -9,8 +9,8 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
-struct semaphore
-struct rwsemaphore
+struct semaphore;
+struct rwsemaphore;
 
 // bio.c
 void            binit(void);
