@@ -23,8 +23,8 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-int sematest(void);
-int rwsematest(void);
+int sematest(int);
+int rwsematest(int);
 
 // ulib.c
 int stat(const char*, struct stat*);
