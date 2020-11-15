@@ -1,6 +1,12 @@
 #include "semaphore.h"
-#include "params.h"
+#include "types.h"
 #include "defs.h"
+#include "param.h"
+#include "x86.h"
+#include "memlayout.h"
+#include "mmu.h"
+#include "proc.h"
+#include "spinlock.h"
 #include "sleeplock.h"
 
 // set the maximum threads to count and initialize anything you need
