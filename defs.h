@@ -195,10 +195,10 @@ int             upsema(struct semaphore*);
 
 // rwsemaphore.c
 void            initrwsema(struct rwsemaphore*);
-int             downreadsema(struct rwsemaphore*);
-int             upreadsema(struct rwsemaphore*);
-int             downwritesema(struct rwsemaphore*);
-int             upwritesema(struct rwsemaphore*);
+void            downreadsema(struct rwsemaphore*);
+void            upreadsema(struct rwsemaphore*);
+void            downwritesema(struct rwsemaphore*);
+void            upwritesema(struct rwsemaphore*);
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
