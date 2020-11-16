@@ -1,6 +1,14 @@
-struct semaphore {
-  struct proc *head;            // head proc pointer
-  struct sleeplock lock; // protects everything below here
-  int max;		                // Max amount of threads
-  int open;                     // current amount of threads open
+#ifndef _SEMAPHORE_H
+#define _SEMAPHORE_H
+
+
+struct semaphore{
+    struct sleeplock slk;
+    struct spinlock spinlk;
+    int count;
+    int CNT;
 };
+
+
+
+#endif
