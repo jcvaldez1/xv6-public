@@ -59,7 +59,6 @@ thread_switch:
 	# movl 0x8(%esp), 0x1C(%eax) 
 	# movl 0x4(%esp), 0x20(%eax)   
 	# movl $0x2, 0x24(%eax) 
-	sub $0x20, %esp
 	popal
 
 	movl next_thread, %eax			# current thread address now contains next thread address
