@@ -11,7 +11,7 @@ thread_switch:
 	add $0x2004, %eax
 	movl %eax, %esp
 	pushal
-	add $0x2004, %eax	  # edit value of current_thread->state
+	add $0x4, %eax	  # edit value of current_thread->state
 	movl $0x2, (%eax)
 	movl current_thread, %eax
 	movl %esp, (%eax)				# current_thread done
