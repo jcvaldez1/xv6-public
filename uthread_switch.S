@@ -8,7 +8,7 @@
 thread_switch:
 	movl current_thread, %eax		# eax now contains current_thread address
 	movl %esp, (%eax)				# move sp to offset  0, 4  bytes taken
-	movl %(eax), %eax				# value of eax is now thread, not thread pointer
+	movl (%eax), %eax				# value of eax is now thread, not thread pointer
 	movl   $0x2,0x2004(%eax)
 	pushal
 	add $0x20, %esp
