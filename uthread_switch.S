@@ -47,7 +47,9 @@ thread_switch:
 	
 	popal
 
-	movl (next_thread), %eax			# current thread address now contains next thread address
-	movl %eax, (current_thread)
-	# movl %eax, %esp
+	movl current_thread, %eax
+	movl (next_thread), %edx
+	movl %edx, (%eax)			# current thread address now contains next thread address
+	movl %edx, %esp
+	
 	ret				/* pop return address from stack */
