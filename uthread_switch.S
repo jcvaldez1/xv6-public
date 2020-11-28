@@ -7,4 +7,8 @@
 	.globl thread_switch
 thread_switch:
 
+	movl current_thread, %eax
+	movl %esp, (%eax)
+	pushal
+
 	ret				/* pop return address from stack */
