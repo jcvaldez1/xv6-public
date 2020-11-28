@@ -8,61 +8,46 @@
 thread_switch:
 	movl current_thread, %eax		# eax now contains current_thread address
 	movl %esp, (%eax)				# move sp to offset  0, 4  bytes taken
-	pushal                          
-	add $32, %esp
+	movl %(eax), %eax				# value of eax is now thread, not thread pointer
+	movl   $0x2,0x2004(%eax)
+	pushal
+	add $0x20, %esp
 
-	add $0x400, %eax
 	movl (%esp), %edx
 	movl %edx, (%eax)
+	sub $0x4, %esp
 
-	add $0x400, %eax
-	sub $4, %esp
 	movl (%esp), %edx
-	movl %edx, (%eax)
+	movl %edx, 0x400(%eax)
+	sub $0x4, %esp
 
-	add $0x400, %eax
-	sub $4, %esp
 	movl (%esp), %edx
-	movl %edx, (%eax)
+	movl %edx, 0x800(%eax)
+	sub $0x4, %esp
 
-	add $0x400, %eax
-	sub $4, %esp
 	movl (%esp), %edx
-	movl %edx, (%eax)
-
-	add $0x400, %eax
-	sub $4, %esp
+	movl %edx, 0xC00(%eax)
+	sub $0x4, %esp
+	
 	movl (%esp), %edx
-	movl %edx, (%eax)
-
-	add $0x400, %eax
-	sub $4, %esp
+	movl %edx, 0x1000(%eax)
+	sub $0x4, %esp
+	
 	movl (%esp), %edx
-	movl %edx, (%eax)
-
-	add $0x400, %eax
-	sub $4, %esp
+	movl %edx, 0x1400(%eax)
+	sub $0x4, %esp
+	
 	movl (%esp), %edx
-	movl %edx, (%eax)
+	movl %edx, 0x1800(%eax)
+	sub $0x4, %esp
 
-	add $0x400, %eax
-	sub $4, %esp
 	movl (%esp), %edx
-	movl %edx, (%eax)
-	sub $4, %esp
-
-	# movl 0x20(%esp), 0x4(%eax)
-	# movl 0x1C(%esp), 0x8(%eax) 
-	# movl 0x18(%esp), 0xC(%eax) 
-	# movl 0x14(%esp), 0x10(%eax) 
-	# movl 0x10(%esp), 0x14(%eax) 
-	# movl 0xC(%esp), 0x18(%eax) 
-	# movl 0x8(%esp), 0x1C(%eax) 
-	# movl 0x4(%esp), 0x20(%eax)   
-	# movl $0x2, 0x24(%eax) 
+	movl %edx, 0x1C00(%eax)
+	sub $0x4, %esp
+	
 	popal
 
 	movl next_thread, %eax			# current thread address now contains next thread address
 	movl %eax, current_thread
-	movl %eax, %esp
+	# movl %eax, %esp
 	ret				/* pop return address from stack */
