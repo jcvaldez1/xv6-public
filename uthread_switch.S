@@ -11,10 +11,10 @@ thread_switch:
 	movl %esp, %eax
 	sub $0x2004,%eax      # %eax now contains &current_thread->sp
 	movl %eax, (current_thread)
-	
+	pushal
 	movl current_thread, %eax
 	movl %esp, (%eax)
-
-	pushal
+	popal
+	
 
 	ret				/* pop return address from stack */
