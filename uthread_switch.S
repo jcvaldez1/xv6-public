@@ -8,7 +8,7 @@
 thread_switch:
 
 	movl (current_thread), %eax
-	add $0x2004, %eax
+	add $0x2000, %eax
 	movl %eax, %esp
 	pushal
 	add $0x4, %eax	  # edit value of current_thread->state
