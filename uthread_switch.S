@@ -7,8 +7,14 @@
 	.globl thread_switch
 thread_switch:
 
+	# set &current_thread->sp to $esp - $0x2004
+	movl %esp, %eax
+	sub $0x2004,%eax      # %eax now contains &current_thread->sp
+	movl %eax, (current_thread)
+	
 	movl current_thread, %eax
 	movl %esp, (%eax)
+
 	pushal
 
 	ret				/* pop return address from stack */
