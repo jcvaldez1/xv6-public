@@ -9,45 +9,45 @@ thread_switch:
 	movl current_thread, %eax		# eax now contains current_thread address
 	movl %esp, (%eax)				# move sp to offset  0, 4  bytes taken
 	pushal                          # push the 8 registers, 32 bytes taken
-	add $0x20, %esp
+	add $32, %esp
 
-	add $0x4, %eax
-	sub $0x4, %esp
+	add $4, %eax
+	sub $4, %esp
 	movl (%esp), %edx
 	movl %edx, (%eax)
 
-	add $0x4, %eax
-	sub $0x4, %esp
+	add $4, %eax
+	sub $4, %esp
 	movl (%esp), %edx
 	movl %edx, (%eax)
 
-	add $0x4, %eax
-	sub $0x4, %esp
+	add $4, %eax
+	sub $4, %esp
 	movl (%esp), %edx
 	movl %edx, (%eax)
 
-	add $0x4, %eax
-	sub $0x4, %esp
+	add $4, %eax
+	sub $4, %esp
 	movl (%esp), %edx
 	movl %edx, (%eax)
 
-	add $0x4, %eax
-	sub $0x4, %esp
+	add $4, %eax
+	sub $4, %esp
 	movl (%esp), %edx
 	movl %edx, (%eax)
 
-	add $0x4, %eax
-	sub $0x4, %esp
+	add $4, %eax
+	sub $4, %esp
 	movl (%esp), %edx
 	movl %edx, (%eax)
 
-	add $0x4, %eax
-	sub $0x4, %esp
+	add $4, %eax
+	sub $4, %esp
 	movl (%esp), %edx
 	movl %edx, (%eax)
 
-	add $0x4, %eax
-	sub $0x4, %esp
+	add $4, %eax
+	sub $4, %esp
 	movl (%esp), %edx
 	movl %edx, (%eax)
 	# movl 0x20(%esp), 0x4(%eax)
