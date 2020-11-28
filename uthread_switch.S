@@ -11,8 +11,8 @@ thread_switch:
 	pushal                          # push the 8 registers, 32 bytes taken
 	addl $0x4, %eax
 	addl $0x4, %esp
-	movl (%esp), (%eax)
-	#movl %edx, (%eax)
+	movl (%esp), %edx
+	movl %edx, (%eax)
 	# movl 0x20(%esp), 0x4(%eax)
 	# movl 0x1C(%esp), 0x8(%eax) 
 	# movl 0x18(%esp), 0xC(%eax) 
@@ -24,6 +24,6 @@ thread_switch:
 	# movl $0x2, 0x24(%eax) 
 	popal
 
-	movl next_thread, current_thread# current thread address now contains next thread address
-
+	movl next_thread, %eax			# current thread address now contains next thread address
+	movl %eax, current_thread
 	ret				/* pop return address from stack */
