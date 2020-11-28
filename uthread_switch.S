@@ -17,8 +17,9 @@ thread_switch:
 	movl (next_thread), %eax  # switch to next_thread
 	movl (%eax), %esp 		  # retrieve value of next_threadad->sp
 	popal
-	movl %esp, %eax
-	sub $0x2000,%eax
+	
+	# movl %esp, %eax
+	# sub $0x2000,%eax
 	movl %eax, (current_thread)
 	# switch to next_thread
 	ret				/* pop return address from stack */
