@@ -593,9 +593,9 @@ thread_switch:
 	popal
  2db:	61                   	popa   
 
-	movl next_thread, %eax			# current thread address now contains next thread address
+	movl (next_thread), %eax			# current thread address now contains next thread address
  2dc:	a1 90 8d 00 00       	mov    0x8d90,%eax
-	movl %eax, current_thread
+	movl %eax, (current_thread)
  2e1:	a3 8c 8d 00 00       	mov    %eax,0x8d8c
 	# movl %eax, %esp
 	ret				/* pop return address from stack */
