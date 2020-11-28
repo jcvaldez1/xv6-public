@@ -23,5 +23,7 @@ thread_switch:
 	movl %esp, %eax
 	sub $0x2000,%eax
 	movl %eax, (current_thread)
+	movl current_thread, %eax
+	movl %esp, (%eax)
 	# switch to next_thread
 	ret				/* pop return address from stack */
