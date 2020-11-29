@@ -24,7 +24,7 @@ thread_switch:
 	
 
 	movl (next_thread), %eax  # switch to next_thread
-	movl (%eax), %esp 		  # retrieve value of next_threadad->sp
+	movl %eax, %esp 		  # retrieve value of next_threadad->sp
 	popal
 	movl current_thread, %eax
 	movl %esp, (%eax)
