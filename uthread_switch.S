@@ -7,17 +7,15 @@
 	.globl thread_switch
 thread_switch:
 
-	pushal
-	movl current_thread, %eax
-	movl %esp, (%eax)	
+	pushal						# save GPRs
+	movl current_thread, %eax   # extract current_thread address
+	movl %esp, (%eax)			# current_thread now contains stack pointer  
 
 	movl next_thread, %eax		# get address of next_thread
-	movl %eax, current_thread	# next_thread address now points to current
+	movl %eax, current_thread	# current_thread now points to next_thread
 
-	movl (next_thread), %eax  # switch to next_thread
-	movl (%eax), %esp 		  # retrieve value of next_threadad->sp
-	popal
-	# movl current_thread, %eax
-	# movl %esp, (%eax)
+	movl (next_thread), %eax  	# extract next_thread data
+	movl (%eax), %esp 		  	# relocate stack pointer to new_thread's saved stack
+	popal						# reload GPRs
 
 	ret				/* pop return address from stack */
