@@ -7,21 +7,25 @@
 	.globl thread_switch
 thread_switch:
 
-	# set &current_thread->sp to $esp - $0x2004
-	movl %esp, %eax
-	sub $0x2004,%eax      # %eax now contains &current_thread->sp
-	movl %eax, (current_thread)
+	movl (current_thread), %eax
+	add $0x2000, %eax
+	movl %eax, %esp
 	pushal
-	add $0x2004, %eax	  # edit value of current_thread->state
-	movl $0x2, (%eax)
+	# add $0x4, %eax	  # edit value of current_thread->state
+	# movl $0x2, (%eax)
 	movl current_thread, %eax
-	movl %esp, (%eax)
+	movl %esp, (%eax)				# current_thread done
 	
+	
+
+	movl next_thread, %eax		# get address of next_thread
+	movl %eax, current_thread	# next_thread address now points to current
+	# assume current_thread already has correct position
+	# movl current_thread, %eax
+	# movl %esp, (%eax)
+
 	movl (next_thread), %eax  # switch to next_thread
 	movl (%eax), %esp 		  # retrieve value of next_threadad->sp
 	popal
-	movl %esp, %eax
-	sub $0x2000,%eax
-	movl %eax, (current_thread)
 	# switch to next_thread
 	ret				/* pop return address from stack */
