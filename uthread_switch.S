@@ -11,8 +11,8 @@ thread_switch:
 	movl current_thread, %eax
 	movl %esp, (%eax)	
 
-	# movl next_thread, %eax		# get address of next_thread
-	# movl %eax, current_thread	# next_thread address now points to current
+	movl next_thread, %eax		# get address of next_thread
+	movl %eax, current_thread	# next_thread address now points to current
 
 	movl (next_thread), %eax  # switch to next_thread
 	movl (%eax), %esp 		  # retrieve value of next_threadad->sp
