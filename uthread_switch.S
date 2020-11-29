@@ -16,18 +16,16 @@ thread_switch:
 	movl current_thread, %eax
 	movl %esp, (%eax)				# current_thread done
 	
+	
+
+	lea %edx, next_threads			# get address of next_thread
+	movl current_thread, (%edx)		# next_thread address now points to current
+	# assume current_thread already has correct position
+	# movl current_thread, %eax
+	# movl %esp, (%eax)
 
 	movl (next_thread), %eax  # switch to next_thread
 	movl (%eax), %esp 		  # retrieve value of next_threadad->sp
-	movl %esp, %eax
-	sub $0x2000,%eax
-	movl %eax, (current_thread)
-	
-	# assume current_thread already has correct position
-	movl current_thread, %eax
-	movl %esp, (%eax)
-
-
 	popal
 	# switch to next_thread
 	ret				/* pop return address from stack */
