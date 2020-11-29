@@ -18,7 +18,7 @@ thread_switch:
 	
 	
 
-	lea %edx, next_threads			# get address of next_thread
+	lea %edx, next_thread			# get address of next_thread
 	movl current_thread, (%edx)		# next_thread address now points to current
 	# assume current_thread already has correct position
 	# movl current_thread, %eax
