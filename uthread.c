@@ -109,6 +109,7 @@ main(int argc, char *argv[])
   thread_init();
   thread_create(mythread);
   thread_create(mythread);
+  thread_create(mythread);
   thread_schedule();
   return 0;
 }
