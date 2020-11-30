@@ -23,6 +23,8 @@ thread_p  current_thread;
 thread_p  next_thread;
 extern void thread_switch(void);
 
+int FLAG = 0;
+
 void 
 thread_init(void)
 {
@@ -33,6 +35,7 @@ thread_init(void)
   // a RUNNABLE thread.
   current_thread = &all_thread[0];
   current_thread->state = RUNNING;
+  FLAG = 1;
 }
 
 static void 
@@ -49,7 +52,7 @@ thread_schedule(void)
     }
   }
 
-  if (t >= all_thread + MAX_THREAD && current_thread->state == RUNNABLE) {
+  if (t >= all_thread + MAX_THREAD && current_thread->state != FREE) {
     /* The current thread is the only runnable thread; run it. */
     next_thread = current_thread;
   }
@@ -61,6 +64,13 @@ thread_schedule(void)
 
   if (current_thread != next_thread) {         /* switch threads?  */
     next_thread->state = RUNNING;
+    if(FLAG){
+        FLAG = 0;
+        current_thread->state = FREE;
+    }else if(current_thread->state == RUNNING){
+        current_thread->state = RUNNABLE;
+    }
+    //printf(1,"switching from %x to %x\n",current_thread,next_thread);
     thread_switch();
   } else
     next_thread = 0;
@@ -79,6 +89,7 @@ thread_create(void (*func)())
   * (int *) (t->sp) = (int)func;           // push return address on stack
   t->sp -= 32;                             // space for registers that thread_switch expects
   t->state = RUNNABLE;
+  uthread_create(thread_schedule);
 }
 
 void 
@@ -94,8 +105,8 @@ mythread(void)
   int i;
   printf(1, "my thread running\n");
   for (i = 0; i < 100; i++) {
-    printf(1, "my thread 0x%x\n", (int) current_thread);
-    thread_yield();
+    printf(1, "my thread 0x%x\n",(int) current_thread);
+    //thread_yield();
   }
   printf(1, "my thread: exit\n");
   current_thread->state = FREE;
