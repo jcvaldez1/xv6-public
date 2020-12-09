@@ -5,9 +5,6 @@
 #include "sleeplock.h"
 #include "fs.h"
 #include "buf.h"
-#define RECOVER 0  // RECOVER
-#define COMMIT 1  // COMMIT
-
 
 // Simple logging that allows concurrent FS system calls.
 //
@@ -37,6 +34,7 @@
 struct logheader {
   int n;
   int block[LOGSIZE];
+  struct buf *buffers[LOGSIZE];
 };
 
 struct log {
@@ -70,19 +68,22 @@ initlog(int dev)
 
 // Copy committed blocks from log to their home location
 static void
-install_trans(int mode)
+install_trans(void)
 {
   int tail;
 
   for (tail = 0; tail < log.lh.n; tail++) {
-    struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
-    if(mode == RECOVER){
-          struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-          memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-          brelse(lbuf);
-    }
-    bwrite(dbuf);  // write dst to disk
-    brelse(dbuf);
+    struct buf *wbuf = log.lh.buffers[tail];
+    // if(log.lh.buffers == 0)
+      // wbuf = bread(log.dev, log.start+tail+1);
+    bwrite(wbuf);
+    brelse(wbuf);
+    // struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+    // struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+    // memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+    // bwrite(dbuf);  // write dst to disk
+    // brelse(lbuf);
+    // brelse(dbuf);
   }
 }
 
@@ -121,7 +122,7 @@ static void
 recover_from_log(void)
 {
   read_head();
-  install_trans(RECOVER); // if committed, copy from log to disk
+  install_trans(); // if committed, copy from log to disk
   log.lh.n = 0;
   write_head(); // clear the log
 }
@@ -189,8 +190,9 @@ write_log(void)
     struct buf *from = bread(log.dev, log.lh.block[tail]); // cache block
     memmove(to->data, from->data, BSIZE);
     bwrite(to);  // write the log
-    brelse(from);
+    // brelse(from);
     brelse(to);
+    log.lh.buffers[tail] = from;
   }
 }
 
@@ -200,7 +202,7 @@ commit()
   if (log.lh.n > 0) {
     write_log();     // Write modified blocks from cache to log
     write_head();    // Write header to disk -- the real commit
-    install_trans(COMMIT); // Now install writes to home locations
+    install_trans(); // Now install writes to home locations
     log.lh.n = 0;
     write_head();    // Erase the transaction from the log
   }
