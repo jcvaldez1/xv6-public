@@ -34,6 +34,7 @@
 struct logheader {
   int n;
   int block[LOGSIZE];
+  struct buf *buffers[LOGSIZE];
 };
 
 struct log {
@@ -72,13 +73,15 @@ install_trans(void)
   int tail;
 
   for (tail = 0; tail < log.lh.n; tail++) {
+    struct buf *wbuf = log.lh.buffers[tail];
+    bwrite(wbuf);
+    brelse(wbuf);
     // struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-    struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+    // struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
     // memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-    // struct buf *dbuf = bget(log.dev, log.lh.block[tail]); // read dst
-    bwrite(dbuf);  // write dst to disk
+    // bwrite(dbuf);  // write dst to disk
     // brelse(lbuf);
-    brelse(dbuf);
+    // brelse(dbuf);
   }
 }
 
@@ -185,8 +188,9 @@ write_log(void)
     struct buf *from = bread(log.dev, log.lh.block[tail]); // cache block
     memmove(to->data, from->data, BSIZE);
     bwrite(to);  // write the log
-    brelse(from);
+    // brelse(from);
     brelse(to);
+    log.lh.buffers[tail] = from;
   }
 }
 
