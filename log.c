@@ -72,11 +72,12 @@ install_trans(void)
   int tail;
 
   for (tail = 0; tail < log.lh.n; tail++) {
-    struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-    struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
-    memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+    // struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+    // struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+    // memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+    struct buf *dbuf = bget(log.dev, log.lh.block[tail]); // read dst
     bwrite(dbuf);  // write dst to disk
-    brelse(lbuf);
+    // brelse(lbuf);
     brelse(dbuf);
   }
 }
