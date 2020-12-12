@@ -87,13 +87,13 @@ install_trans(int mode)
   //     brelse(dbuf);
   //   }
   // }
-  acquire(ck->checkpoint_lock);
+  acquire(ck->lock);
   ck->n = log.lh.n;
-  ck->block = log.lh.block;
+  ck->block = &log.lh.block;
   ck->start = log.start;
   ck->dev = log.dev;
   wakeup(ck);
-  release(ck->checkpoint_lock);
+  release(ck->lock);
   // int tail;
   // for (tail = 0; tail < log.lh.n; tail++) {
   //   struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
