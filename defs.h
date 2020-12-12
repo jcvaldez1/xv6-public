@@ -13,8 +13,8 @@ struct checkpoint {
   struct spinlock *lock;
   int n;
   int dev;
-  int block[];
   int start;
+  int block[];
 };
 
 // bio.c
