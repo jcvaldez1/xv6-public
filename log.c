@@ -68,8 +68,20 @@ initlog(int dev)
   log.start = sb.logstart;
   log.size = sb.nlog;
   log.dev = dev;
-  ck = bretrieve();
   recover_from_log();
+  // ck = bretrieve();
+  int pid;
+  initlock(ck->lock, "checkpoint");
+  pid = fork();
+  if(pid < 0){
+    panic("initlog fork failed");
+  }
+  if(pid == 0){
+    checkpoint();
+  } else {
+    exit();
+  }
+  
 }
 
 // Copy committed blocks from log to their home location
@@ -256,6 +268,29 @@ log_write(struct buf *b)
     log.lh.n++;
   b->flags |= B_DIRTY; // prevent eviction
   release(&log.lock);
+}
+
+void
+checkpoint(void)
+{
+  for(;;){
+    acquire(ck->lock);
+    sleep(ck, ck->lock);
+    begin_op();
+    acquire(&bcache.lock);
+    int tail;
+    for (tail = 0; tail < ck->n; tail++) {
+      struct buf *dbuf = bread(ck->dev, ck->block[tail]); // read dst
+      struct buf *lbuf = bread(ck->dev, ck->start+tail+1); // read log block
+      memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+      bwrite(dbuf);
+      brelse(lbuf);
+      brelse(dbuf);
+    }
+    release(&bcache.lock);
+    end_op();
+    release(ck->lock);
+  }
 }
 
 

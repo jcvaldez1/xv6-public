@@ -55,17 +55,17 @@ binit(void)
     bcache.head.next->prev = b;
     bcache.head.next = b;
   }
-  int pid;
-  initlock(ck->lock, "checkpoint");
-  pid = fork();
-  if(pid < 0){
-    panic("binit fork failed");
-  }
-  if(pid == 0){
-    bcheckpoint(ck);
-  } else {
-    exit();
-  }
+  // int pid;
+  // initlock(ck->lock, "checkpoint");
+  // pid = fork();
+  // if(pid < 0){
+  //   panic("binit fork failed");
+  // }
+  // if(pid == 0){
+  //   bcheckpoint(ck);
+  // } else {
+  //   exit();
+  // }
 }
 
 // Look through buffer cache for block on device dev.
