@@ -145,26 +145,18 @@ brelse(struct buf *b)
 void
 bcheckpoint(struct sleeplock *checkpoint_lock)
 {
-  int ran = 0;
   for(;;){
     acquiresleep(checkpoint_lock);
     // begin_op();
     struct buf *b;
     acquire(&bcache.lock);
-
-    // Find all log blocks
     for(b = bcache.head.next; b != &bcache.head; b = b->next){
       if( (b->flags & B_LOG) == 1){
-        release(&bcache.lock);
         bwrite(b);
         brelse(b);
-        ran = 1;
       }
     }
-    if(ran == 0){
-      release(&bcache.lock);
-    }
-    ran = 0;
+    release(&bcache.lock);
     // end_op();
     releasesleep(checkpoint_lock);
   }
