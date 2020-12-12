@@ -89,7 +89,7 @@ install_trans(int mode)
   // }
   acquire(ck->lock);
   ck->n = log.lh.n;
-  ck->block = &log.lh.block;
+  ck->block = log.lh.block;
   ck->start = log.start;
   ck->dev = log.dev;
   wakeup(ck);
