@@ -77,23 +77,25 @@ static void
 install_trans(int mode)
 {
 
-  // int tail;
-  // if(mode == RECOVER){
-  //   for (tail = 0; tail < log.lh.n; tail++) {
-  //     struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
-  //     struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-  //     memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-  //     brelse(lbuf);
-  //     brelse(dbuf);
-  //   }
-  // }
-  acquire(ck->lock);
-  ck->n = log.lh.n;
-  ck->block = log.lh.block;
-  ck->start = log.start;
-  ck->dev = log.dev;
-  wakeup(ck);
-  release(ck->lock);
+  int tail;
+  if(mode == RECOVER){
+    for (tail = 0; tail < log.lh.n; tail++) {
+      struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+      struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+      memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+      bwrite(dbuf);
+      brelse(lbuf);
+      brelse(dbuf);
+    }
+  } else {
+    acquire(ck->lock);
+    ck->n = log.lh.n;
+    ck->block = log.lh.block;
+    ck->start = log.start;
+    ck->dev = log.dev;
+    wakeup(ck);
+    release(ck->lock);  
+  }
   // int tail;
   // for (tail = 0; tail < log.lh.n; tail++) {
   //   struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
