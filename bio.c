@@ -145,6 +145,7 @@ brelse(struct buf *b)
 void
 bcheckpoint(struct sleeplock *checkpoint_lock)
 {
+  int ran = 0;
   for(;;){
     acquiresleep(checkpoint_lock);
     // begin_op();
@@ -157,9 +158,12 @@ bcheckpoint(struct sleeplock *checkpoint_lock)
         release(&bcache.lock);
         bwrite(b);
         brelse(b);
+        ran = 1;
       }
     }
-    // end_op();  
+    if(!ran)
+      release(&bcache.lock);
+    // end_op();
     releasesleep(checkpoint_lock);
   }
 }
