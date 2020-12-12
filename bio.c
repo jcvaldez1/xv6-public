@@ -166,9 +166,9 @@ bcheckpoint(struct checkpoint *ck)
     begin_op();
     acquire(&bcache.lock);
     int tail;
-    for (tail = 0; tail < ck.n; tail++) {
-      struct buf *dbuf = bread(ck.dev, ck.block[tail]); // read dst
-      struct buf *lbuf = bread(ck.dev, ck.start+tail+1); // read log block
+    for (tail = 0; tail < ck->n; tail++) {
+      struct buf *dbuf = bread(ck->dev, ck->block[tail]); // read dst
+      struct buf *lbuf = bread(ck->dev, ck->start+tail+1); // read log block
       memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
       bwrite(dbuf);
       brelse(lbuf);
