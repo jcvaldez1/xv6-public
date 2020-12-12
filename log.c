@@ -8,7 +8,6 @@
 #define RECOVER 0  // RECOVER
 #define COMMIT 1  // COMMIT
 
-
 // Simple logging that allows concurrent FS system calls.
 //
 // A log transaction contains the updates of multiple FS system
@@ -50,6 +49,8 @@ struct log {
 };
 struct log log;
 
+struct sleeplock checkpoint_lock;
+
 static void recover_from_log(void);
 static void commit();
 
@@ -72,18 +73,28 @@ initlog(int dev)
 static void
 install_trans(int mode)
 {
-  int tail;
 
-  for (tail = 0; tail < log.lh.n; tail++) {
-    struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
-    if(mode == RECOVER){
-          struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-          memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-          brelse(lbuf);
+  int tail;
+  if(mode == RECOVER){
+    for (tail = 0; tail < log.lh.n; tail++) {
+      struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+      struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+      memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+      brelse(lbuf);
+      dbuf->flags |= B_LOG;
     }
-    bwrite(dbuf);  // write dst to disk
-    brelse(dbuf);
   }
+  releasesleep(&checkpoint_lock);
+  acquiresleep(&checkpoint_lock);
+  // int tail;
+  // for (tail = 0; tail < log.lh.n; tail++) {
+  //   struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+  //   struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+  //   memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+  //   bwrite(dbuf);  // write dst to disk
+  //   brelse(lbuf);
+  //   brelse(dbuf);
+  // }
 }
 
 // Read the log header from disk into the in-memory log header
@@ -121,6 +132,9 @@ static void
 recover_from_log(void)
 {
   read_head();
+  initsleeplock(&checkpoint_lock, "checkpoint");
+  acquiresleep(&checkpoint_lock);
+  bcheckpoint(&checkpoint_lock);
   install_trans(RECOVER); // if committed, copy from log to disk
   log.lh.n = 0;
   write_head(); // clear the log
@@ -190,6 +204,7 @@ write_log(void)
     memmove(to->data, from->data, BSIZE);
     bwrite(to);  // write the log
     // brelse(from);
+    from->flags |= B_LOG;
     brelse(to);
   }
 }
