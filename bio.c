@@ -147,7 +147,7 @@ bcheckpoint(struct logheader *lh)
 {
   acquire(&lh.checkpoint_lock);
   // begin_op();
-  sleep(lh);
+  sleep(lh, &lh.checkpoint_lock);
   int tail;
   // acquire(&bcache.lock);
   // for(b = bcache.head.next; b != &bcache.head; b = b->next){
