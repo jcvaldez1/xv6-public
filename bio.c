@@ -153,7 +153,7 @@ bcheckpoint(struct sleeplock *checkpoint_lock)
 
     // Find all log blocks
     for(b = bcache.head.next; b != &bcache.head; b = b->next){
-      if( (b->flags & B_LOG) == 0){
+      if( (b->flags & B_LOG) == 1){
         release(&bcache.lock);
         bwrite(b);
         brelse(b);
