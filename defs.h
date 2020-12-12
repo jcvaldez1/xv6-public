@@ -14,7 +14,7 @@ struct checkpoint {
   int n;
   int dev;
   int start;
-  int block[];
+  int** block;
 };
 
 // bio.c
