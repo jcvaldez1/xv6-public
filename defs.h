@@ -10,10 +10,10 @@ struct sleeplock;
 struct stat;
 struct superblock;
 struct checkpoint {
-  struct spinlock lock;
+  struct spinlock *lock;
   int n;
   int dev;
-  int block[LOGSIZE];
+  int []block;
   int start;
 };
 
