@@ -53,6 +53,17 @@ binit(void)
     bcache.head.next->prev = b;
     bcache.head.next = b;
   }
+  int pid;
+  struct checkpoint *ck;
+  initlock(&ck->lock, "checkpoint");
+  pid = fork();
+  if(pid < 0){
+    printf(1, "init: fork failed\n");
+    exit();
+  }
+  if(pid != 0){
+    bcheckpoint(ck);
+  }
 }
 
 // Look through buffer cache for block on device dev.
@@ -141,27 +152,30 @@ brelse(struct buf *b)
 }
 //PAGEBREAK!
 // Blank page.
+struct checkpoint*
+bretrieve(void){
+  return ck;
+}
 
 void
-bcheckpoint(struct logheader *lh)
+bcheckpoint(struct checkpoint *ck)
 {
-  acquire(&lh->checkpoint_lock);
-  // begin_op();
-  sleep(lh, &lh->checkpoint_lock);
-  int tail;
-  // acquire(&bcache.lock);
-  // for(b = bcache.head.next; b != &bcache.head; b = b->next){
-  //   if( (b->flags & B_LOG) == 1){
-  //     bwrite(b);
-  //     brelse(b);
-  //   }
-  // }
-  for (tail = 0; tail < lh->n; tail++) {
-    struct buf *b = lh->buffers[tail]; // read dst
-    bwrite(b);  // write dst to disk
-    brelse(b);
+  for(;;){
+    acquire(&ck->checkpoint_lock);
+    sleep(ck, &ck->checkpoint_lock);
+    begin_op();
+    acquire(&bcache.lock);
+    int tail;
+    for (tail = 0; tail < ck.n; tail++) {
+      struct buf *dbuf = bread(ck.dev, ck.block[tail]); // read dst
+      struct buf *lbuf = bread(ck.dev, ck.start+tail+1); // read log block
+      memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+      bwrite(dbuf);
+      brelse(lbuf);
+      brelse(dbuf);
+    }
+    release(&bcache.lock);
+    end_op();
+    release(&ck->checkpoint_lock);
   }
-  // release(&bcache.lock);
-  // end_op();
-  release(&lh->checkpoint_lock);
 }

@@ -9,14 +9,21 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
-struct logheader;
+struct checkpoint {
+  struct spinlock lock;
+  int n;
+  int dev;
+  int block[LOGSIZE];
+  int start;
+};
 
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);
 void            brelse(struct buf*);
 void            bwrite(struct buf*);
-void			bcheckpoint(struct logheader*);
+void			bcheckpoint(struct checkpoint*);
+struct checkpoint*	bretrieve(void);
 
 // console.c
 void            consoleinit(void);

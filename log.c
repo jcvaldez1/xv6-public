@@ -37,7 +37,6 @@ struct logheader {
   int n;
   int block[LOGSIZE];
   struct buf buffers[LOGSIZE];
-  struct spinlock checkpoint_lock;
 };
 
 struct log {
@@ -49,7 +48,10 @@ struct log {
   int dev;
   struct logheader lh;
 };
+
 struct log log;
+
+struct checkpoint ck;
 
 static void recover_from_log(void);
 static void commit();
@@ -66,7 +68,7 @@ initlog(int dev)
   log.start = sb.logstart;
   log.size = sb.nlog;
   log.dev = dev;
-  initlock(&log.lh.checkpoint_lock, "checkpoint"); // initialize spinlock for waking the buffer cache process up
+  ck = bretrieve();
   recover_from_log();
 }
 
@@ -75,18 +77,23 @@ static void
 install_trans(int mode)
 {
 
-  int tail;
-  if(mode == RECOVER){
-    for (tail = 0; tail < log.lh.n; tail++) {
-      struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
-      struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-      memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-      brelse(lbuf);
-    }
-  }
-  acquire(&log.lh.checkpoint_lock);
-  wakeup(log.lh);
-  release(&log.lh.checkpoint_lock);
+  // int tail;
+  // if(mode == RECOVER){
+  //   for (tail = 0; tail < log.lh.n; tail++) {
+  //     struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+  //     struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+  //     memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+  //     brelse(lbuf);
+  //     brelse(dbuf);
+  //   }
+  // }
+  acquire(&ck->checkpoint_lock);
+  ck.n = log.lh.n;
+  ck.block = log.lh.block;
+  ck.start = log.start;
+  ck.dev = log.dev;
+  wakeup(ck);
+  release(&ck->checkpoint_lock);
   // int tail;
   // for (tail = 0; tail < log.lh.n; tail++) {
   //   struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
@@ -133,7 +140,6 @@ static void
 recover_from_log(void)
 {
   read_head();
-  bcheckpoint(&log.lh);
   install_trans(RECOVER); // if committed, copy from log to disk
   log.lh.n = 0;
   write_head(); // clear the log
@@ -202,7 +208,7 @@ write_log(void)
     struct buf *from = bread(log.dev, log.lh.block[tail]); // cache block
     memmove(to->data, from->data, BSIZE);
     bwrite(to);  // write the log
-    // brelse(from);
+    brelse(from);
     brelse(to);
   }
 }
@@ -249,4 +255,5 @@ log_write(struct buf *b)
   b->flags |= B_DIRTY; // prevent eviction
   release(&log.lock);
 }
+
 
