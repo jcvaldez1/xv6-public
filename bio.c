@@ -142,3 +142,24 @@ brelse(struct buf *b)
 //PAGEBREAK!
 // Blank page.
 
+void
+bcheckpoint(struct sleeplock *checkpoint_lock)
+{
+  for(;;){
+    acquiresleep(checkpoint_lock);
+    begin_op();
+    struct buf *b;
+    acquire(&bcache.lock);
+
+    // Find all log blocks
+    for(b = bcache.head.next; b != &bcache.head; b = b->next){
+      if( (b->flags & B_LOG) == 0){
+        release(&bcache.lock);
+        bwrite(b);
+        brelse(b);
+      }
+    }
+    end_op();
+    releasesleep(checkpoint_lock);
+  }
+}

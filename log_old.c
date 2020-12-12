@@ -5,6 +5,8 @@
 #include "sleeplock.h"
 #include "fs.h"
 #include "buf.h"
+#define RECOVER 0  // RECOVER
+#define COMMIT 1  // COMMIT
 
 // Simple logging that allows concurrent FS system calls.
 //
@@ -34,7 +36,6 @@
 struct logheader {
   int n;
   int block[LOGSIZE];
-  struct buf *buffers[LOGSIZE];
 };
 
 struct log {
@@ -47,6 +48,8 @@ struct log {
   struct logheader lh;
 };
 struct log log;
+
+struct sleeplock checkpoint_lock;
 
 static void recover_from_log(void);
 static void commit();
@@ -68,23 +71,30 @@ initlog(int dev)
 
 // Copy committed blocks from log to their home location
 static void
-install_trans(void)
+install_trans(int mode)
 {
-  int tail;
 
-  for (tail = 0; tail < log.lh.n; tail++) {
-    struct buf *wbuf = log.lh.buffers[tail];
-    // if(log.lh.buffers == 0)
-      // wbuf = bread(log.dev, log.start+tail+1);
-    bwrite(wbuf);
-    brelse(wbuf);
-    // struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-    // struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
-    // memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-    // bwrite(dbuf);  // write dst to disk
-    // brelse(lbuf);
-    // brelse(dbuf);
+  int tail;
+  if(mode == RECOVER){
+    for (tail = 0; tail < log.lh.n; tail++) {
+      struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+      struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+      memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+      brelse(lbuf);
+      dbuf->flags |= B_LOG;
+    }
   }
+  releasesleep(&checkpoint_lock);
+  acquiresleep(&checkpoint_lock);
+  // int tail;
+  // for (tail = 0; tail < log.lh.n; tail++) {
+  //   struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+  //   struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+  //   memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+  //   bwrite(dbuf);  // write dst to disk
+  //   brelse(lbuf);
+  //   brelse(dbuf);
+  // }
 }
 
 // Read the log header from disk into the in-memory log header
@@ -122,7 +132,10 @@ static void
 recover_from_log(void)
 {
   read_head();
-  install_trans(); // if committed, copy from log to disk
+  initsleeplock(&checkpoint_lock, "checkpoint");
+  acquiresleep(&checkpoint_lock);
+  bcheckpoint(&checkpoint_lock);
+  install_trans(RECOVER); // if committed, copy from log to disk
   log.lh.n = 0;
   write_head(); // clear the log
 }
@@ -191,8 +204,8 @@ write_log(void)
     memmove(to->data, from->data, BSIZE);
     bwrite(to);  // write the log
     // brelse(from);
+    from->flags |= B_LOG;
     brelse(to);
-    log.lh.buffers[tail] = from;
   }
 }
 
@@ -202,7 +215,7 @@ commit()
   if (log.lh.n > 0) {
     write_log();     // Write modified blocks from cache to log
     write_head();    // Write header to disk -- the real commit
-    install_trans(); // Now install writes to home locations
+    install_trans(COMMIT); // Now install writes to home locations
     log.lh.n = 0;
     write_head();    // Erase the transaction from the log
   }

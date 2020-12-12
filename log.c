@@ -5,7 +5,6 @@
 #include "sleeplock.h"
 #include "fs.h"
 #include "buf.h"
-#include "user.h"
 #define RECOVER 0  // RECOVER
 #define COMMIT 1  // COMMIT
 
@@ -70,7 +69,7 @@ initlog(int dev)
 }
 
 // Copy committed blocks from log to their home location
-void
+static void
 install_trans(int mode)
 {
   int tail;
@@ -190,7 +189,7 @@ write_log(void)
     struct buf *from = bread(log.dev, log.lh.block[tail]); // cache block
     memmove(to->data, from->data, BSIZE);
     bwrite(to);  // write the log
-    brelse(from);
+    // brelse(from);
     brelse(to);
   }
 }
@@ -201,8 +200,7 @@ commit()
   if (log.lh.n > 0) {
     write_log();     // Write modified blocks from cache to log
     write_head();    // Write header to disk -- the real commit
-    // install_trans(COMMIT); // Now install writes to home locations
-    checkpoint();
+    install_trans(COMMIT); // Now install writes to home locations
     log.lh.n = 0;
     write_head();    // Erase the transaction from the log
   }

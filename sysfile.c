@@ -446,8 +446,8 @@ sys_pipe(void)
 int
 sys_checkpoint(void)
 {
-  begin_op();
-  install_trans(0);
-  end_op();
+  // begin_op();
+  // install_trans(0);
+  // end_op();
   return 0;
 }
