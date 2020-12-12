@@ -164,6 +164,7 @@ bcheckpoint(struct sleeplock *checkpoint_lock)
     if(ran == 0){
       release(&bcache.lock);
     }
+    ran = 0;
     // end_op();
     releasesleep(checkpoint_lock);
   }
