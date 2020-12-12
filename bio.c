@@ -143,21 +143,25 @@ brelse(struct buf *b)
 // Blank page.
 
 void
-bcheckpoint(struct sleeplock *checkpoint_lock)
+bcheckpoint(struct logheader *lh)
 {
-  for(;;){
-    acquiresleep(checkpoint_lock);
-    // begin_op();
-    struct buf *b;
-    acquire(&bcache.lock);
-    for(b = bcache.head.next; b != &bcache.head; b = b->next){
-      if( (b->flags & B_LOG) == 1){
-        bwrite(b);
-        brelse(b);
-      }
-    }
-    release(&bcache.lock);
-    // end_op();
-    releasesleep(checkpoint_lock);
+  acquire(&lh.checkpoint_lock);
+  // begin_op();
+  sleep(lh);
+  int tail;
+  // acquire(&bcache.lock);
+  // for(b = bcache.head.next; b != &bcache.head; b = b->next){
+  //   if( (b->flags & B_LOG) == 1){
+  //     bwrite(b);
+  //     brelse(b);
+  //   }
+  // }
+  for (tail = 0; tail < lh.n; tail++) {
+    struct buf *b = lh.buffers[tail]; // read dst
+    bwrite(b);  // write dst to disk
+    brelse(b);
   }
+  // release(&bcache.lock);
+  // end_op();
+  release(&lh.checkpoint_lock);
 }

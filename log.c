@@ -36,6 +36,8 @@
 struct logheader {
   int n;
   int block[LOGSIZE];
+  struct buf buffers[LOGSIZE];
+  struct spinlock checkpoint_lock;
 };
 
 struct log {
@@ -48,8 +50,6 @@ struct log {
   struct logheader lh;
 };
 struct log log;
-
-struct sleeplock checkpoint_lock;
 
 static void recover_from_log(void);
 static void commit();
@@ -66,6 +66,7 @@ initlog(int dev)
   log.start = sb.logstart;
   log.size = sb.nlog;
   log.dev = dev;
+  initlock(&log.lh.checkpoint_lock, "checkpoint"); // initialize spinlock for waking the buffer cache process up
   recover_from_log();
 }
 
@@ -81,11 +82,11 @@ install_trans(int mode)
       struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
       memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
       brelse(lbuf);
-      dbuf->flags |= B_LOG;
     }
   }
-  releasesleep(&checkpoint_lock);
-  acquiresleep(&checkpoint_lock);
+  acquire(&log.lh.checkpoint_lock);
+  wakeup(log.lh);
+  release(&log.lh.checkpoint_lock);
   // int tail;
   // for (tail = 0; tail < log.lh.n; tail++) {
   //   struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
@@ -132,9 +133,7 @@ static void
 recover_from_log(void)
 {
   read_head();
-  initsleeplock(&checkpoint_lock, "checkpoint");
-  bcheckpoint(&checkpoint_lock);
-  acquiresleep(&checkpoint_lock);
+  bcheckpoint(&log.lh);
   install_trans(RECOVER); // if committed, copy from log to disk
   log.lh.n = 0;
   write_head(); // clear the log
@@ -204,7 +203,6 @@ write_log(void)
     memmove(to->data, from->data, BSIZE);
     bwrite(to);  // write the log
     // brelse(from);
-    from->flags |= B_LOG;
     brelse(to);
   }
 }
