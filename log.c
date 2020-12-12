@@ -55,6 +55,7 @@ struct checkpoint *ck;
 
 static void recover_from_log(void);
 static void commit();
+static void checkpoint();
 
 void
 initlog(int dev)
@@ -270,14 +271,13 @@ log_write(struct buf *b)
   release(&log.lock);
 }
 
-void
+static void
 checkpoint(void)
 {
   for(;;){
     acquire(ck->lock);
     sleep(ck, ck->lock);
     begin_op();
-    acquire(&bcache.lock);
     int tail;
     for (tail = 0; tail < ck->n; tail++) {
       struct buf *dbuf = bread(ck->dev, ck->block[tail]); // read dst
@@ -287,7 +287,6 @@ checkpoint(void)
       brelse(lbuf);
       brelse(dbuf);
     }
-    release(&bcache.lock);
     end_op();
     release(ck->lock);
   }
