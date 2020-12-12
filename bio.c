@@ -61,7 +61,7 @@ binit(void)
   if(pid < 0){
     panic("binit fork failed");
   }
-  if(pid != 0){
+  if(pid == 0){
     bcheckpoint(ck);
   }
 }
