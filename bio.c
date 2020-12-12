@@ -63,6 +63,8 @@ binit(void)
   }
   if(pid == 0){
     bcheckpoint(ck);
+  } else {
+    exit();
   }
 }
 
