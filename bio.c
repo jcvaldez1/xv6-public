@@ -35,6 +35,7 @@ struct {
   struct buf head;
 } bcache;
 
+struct checkpoint ck;
 void
 binit(void)
 {
@@ -54,7 +55,6 @@ binit(void)
     bcache.head.next = b;
   }
   int pid;
-  struct checkpoint *ck;
   initlock(ck->lock, "checkpoint");
   pid = fork();
   if(pid < 0){
