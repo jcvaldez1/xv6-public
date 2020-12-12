@@ -35,7 +35,8 @@ struct {
   struct buf head;
 } bcache;
 
-struct checkpoint ck;
+struct checkpoint *ck;
+
 void
 binit(void)
 {
