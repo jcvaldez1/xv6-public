@@ -9,13 +9,14 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct logheader;
 
 // bio.c
 void            binit(void);
 struct buf*     bread(uint, uint);
 void            brelse(struct buf*);
 void            bwrite(struct buf*);
-void			bcheckpoint(struct sleeplock*);
+void			bcheckpoint(struct logheader*);
 
 // console.c
 void            consoleinit(void);
@@ -87,7 +88,6 @@ void            initlog(int dev);
 void            log_write(struct buf*);
 void            begin_op();
 void            end_op();
-struct 			logheader;
 
 // mp.c
 extern int      ismp;
