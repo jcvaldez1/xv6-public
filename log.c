@@ -133,8 +133,8 @@ recover_from_log(void)
 {
   read_head();
   initsleeplock(&checkpoint_lock, "checkpoint");
-  acquiresleep(&checkpoint_lock);
   bcheckpoint(&checkpoint_lock);
+  acquiresleep(&checkpoint_lock);
   install_trans(RECOVER); // if committed, copy from log to disk
   log.lh.n = 0;
   write_head(); // clear the log
