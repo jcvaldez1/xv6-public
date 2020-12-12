@@ -36,7 +36,6 @@
 struct logheader {
   int n;
   int block[LOGSIZE];
-  struct buf buffers[LOGSIZE];
 };
 
 struct log {
