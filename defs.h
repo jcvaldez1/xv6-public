@@ -13,7 +13,7 @@ struct checkpoint {
   struct spinlock *lock;
   int n;
   int dev;
-  int []block;
+  int block[];
   int start;
 };
 
