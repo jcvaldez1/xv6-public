@@ -5,6 +5,7 @@
 #include "sleeplock.h"
 #include "fs.h"
 #include "buf.h"
+#include "user.h"
 #define RECOVER 0  // RECOVER
 #define COMMIT 1  // COMMIT
 
@@ -200,7 +201,8 @@ commit()
   if (log.lh.n > 0) {
     write_log();     // Write modified blocks from cache to log
     write_head();    // Write header to disk -- the real commit
-    install_trans(COMMIT); // Now install writes to home locations
+    // install_trans(COMMIT); // Now install writes to home locations
+    checkpoint();
     log.lh.n = 0;
     write_head();    // Erase the transaction from the log
   }
