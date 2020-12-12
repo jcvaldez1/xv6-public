@@ -55,7 +55,7 @@ binit(void)
   }
   int pid;
   struct checkpoint *ck;
-  initlock(&ck->lock, "checkpoint");
+  initlock(ck->lock, "checkpoint");
   pid = fork();
   if(pid < 0){
     panic("binit fork failed");
@@ -160,8 +160,8 @@ void
 bcheckpoint(struct checkpoint *ck)
 {
   for(;;){
-    acquire(&ck->lock);
-    sleep(ck, &ck->lock);
+    acquire(ck->lock);
+    sleep(ck, ck->lock);
     begin_op();
     acquire(&bcache.lock);
     int tail;
@@ -175,6 +175,6 @@ bcheckpoint(struct checkpoint *ck)
     }
     release(&bcache.lock);
     end_op();
-    release(&ck->lock);
+    release(ck->lock);
   }
 }
