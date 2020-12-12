@@ -69,7 +69,7 @@ initlog(int dev)
 }
 
 // Copy committed blocks from log to their home location
-static void
+void
 install_trans(int mode)
 {
   int tail;
