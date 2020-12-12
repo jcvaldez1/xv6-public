@@ -145,9 +145,9 @@ brelse(struct buf *b)
 void
 bcheckpoint(struct logheader *lh)
 {
-  acquire(&lh.checkpoint_lock);
+  acquire(&lh->checkpoint_lock);
   // begin_op();
-  sleep(lh, &lh.checkpoint_lock);
+  sleep(lh, &lh->checkpoint_lock);
   int tail;
   // acquire(&bcache.lock);
   // for(b = bcache.head.next; b != &bcache.head; b = b->next){
@@ -156,12 +156,12 @@ bcheckpoint(struct logheader *lh)
   //     brelse(b);
   //   }
   // }
-  for (tail = 0; tail < lh.n; tail++) {
-    struct buf *b = lh.buffers[tail]; // read dst
+  for (tail = 0; tail < lh->n; tail++) {
+    struct buf *b = lh->buffers[tail]; // read dst
     bwrite(b);  // write dst to disk
     brelse(b);
   }
   // release(&bcache.lock);
   // end_op();
-  release(&lh.checkpoint_lock);
+  release(&lh->checkpoint_lock);
 }
