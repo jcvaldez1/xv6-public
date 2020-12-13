@@ -81,7 +81,7 @@ initlog(int dev)
   // } else {
   //   exit();
   // }
-  checkpoint();
+  // checkpoint();
   panic("test");
 }
 
