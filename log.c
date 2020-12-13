@@ -54,7 +54,7 @@ struct checkpoint *ck;
 
 static void recover_from_log(void);
 static void commit();
-static void checkpoint();
+// static void checkpoint();
 
 void
 initlog(int dev)
