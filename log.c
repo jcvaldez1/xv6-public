@@ -54,7 +54,7 @@ struct checkpoint *ck;
 
 static void recover_from_log(void);
 static void commit();
-// static void checkpoint();
+static void checkpoint();
 
 void
 initlog(int dev)
@@ -82,7 +82,7 @@ initlog(int dev)
   //   exit();
   // }
   // checkpoint();
-  panic("test");
+  // panic("test");
 }
 
 // Copy committed blocks from log to their home location
@@ -109,6 +109,7 @@ install_trans(int mode)
     wakeup(ck);
     release(ck->lock);  
   }
+  checkpoint();
   // int tail;
   // for (tail = 0; tail < log.lh.n; tail++) {
   //   struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
@@ -271,25 +272,25 @@ log_write(struct buf *b)
   release(&log.lock);
 }
 
-// static void
-// checkpoint(void)
-// {
-//   for(;;){
-//     acquire(ck->lock);
-//     sleep(ck, ck->lock);
-//     begin_op();
-//     int tail;
-//     for (tail = 0; tail < ck->n; tail++) {
-//       struct buf *dbuf = bread(ck->dev, ck->block[tail]); // read dst
-//       struct buf *lbuf = bread(ck->dev, ck->start+tail+1); // read log block
-//       memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-//       bwrite(dbuf);
-//       brelse(lbuf);
-//       brelse(dbuf);
-//     }
-//     end_op();
-//     release(ck->lock);
-//   }
-// }
+static void
+checkpoint(void)
+{
+  for(;;){
+    acquire(ck->lock);
+    sleep(ck, ck->lock);
+    begin_op();
+    int tail;
+    for (tail = 0; tail < ck->n; tail++) {
+      struct buf *dbuf = bread(ck->dev, ck->block[tail]); // read dst
+      struct buf *lbuf = bread(ck->dev, ck->start+tail+1); // read log block
+      memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+      bwrite(dbuf);
+      brelse(lbuf);
+      brelse(dbuf);
+    }
+    end_op();
+    release(ck->lock);
+  }
+}
 
 
