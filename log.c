@@ -108,8 +108,9 @@ install_trans(int mode)
     ck->dev = log.dev;
     wakeup(ck);
     release(ck->lock);  
+    checkpoint();
   }
-  checkpoint();
+
   // int tail;
   // for (tail = 0; tail < log.lh.n; tail++) {
   //   struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
