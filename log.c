@@ -70,18 +70,19 @@ initlog(int dev)
   log.dev = dev;
   recover_from_log();
   // ck = bretrieve();
-  int pid;
-  initlock(ck->lock, "checkpoint");
-  pid = fork();
-  if(pid < 0){
-    panic("initlog fork failed");
-  }
-  if(pid == 0){
-    checkpoint();
-  } else {
-    exit();
-  }
-  
+  // int pid;
+  // initlock(ck->lock, "checkpoint");
+  // pid = fork();
+  // if(pid < 0){
+  //   panic("initlog fork failed");
+  // }
+  // if(pid == 0){
+  //   checkpoint();
+  // } else {
+  //   exit();
+  // }
+  checkpoint();
+  panic("test");
 }
 
 // Copy committed blocks from log to their home location
