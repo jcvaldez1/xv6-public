@@ -71,12 +71,12 @@ initlog(int dev)
   log.dev = dev;
   recover_from_log();
   initlock(&ck.lock, "checkpoint");
-  // checkpointinit(checkpoint);
-  int pid;
-  pid = checkpoint_fork();
-  if(pid==0){
-    checkpoint();
-  }
+  checkpointinit(checkpoint);
+  // int pid;
+  // pid = checkpoint_fork();
+  // if(pid==0){
+  //   checkpoint();
+  // }
 }
 
 // Copy committed blocks from log to their home location
@@ -259,6 +259,7 @@ checkpoint(void)
     acquire(&ck.lock);
     sleep(&ck, &ck.lock);
     int tail;
+    tail = 0;
     for (tail = 0; tail < log.lh.n; tail++) {
       struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
       struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
