@@ -63,6 +63,7 @@ initlog(int dev)
   log.size = sb.nlog;
   log.dev = dev;
   recover_from_log();
+  checkpointinit((uint)checkpoint);
 }
 
 // Copy committed blocks from log to their home location
@@ -232,3 +233,23 @@ log_write(struct buf *b)
   release(&log.lock);
 }
 
+static void
+checkpoint(void)
+{
+  for(;;){
+    acquire(&log->lock);
+    sleep(&log, &log->lock);
+    // begin_op();
+    int tail;
+    for (tail = 0; tail < log.lh.n; tail++) {
+      struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+      struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+      memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+      bwrite(dbuf);  // write dst to disk
+      brelse(lbuf);
+      brelse(dbuf);
+    }
+    // end_op();
+    release(&log->lock);
+  }
+}
