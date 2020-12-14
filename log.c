@@ -69,9 +69,9 @@ initlog(int dev)
   log.start = sb.logstart;
   log.size = sb.nlog;
   log.dev = dev;
-  recover_from_log();
   initlock(&ck.lock, "checkpoint");
   checkpointinit(checkpoint);
+  recover_from_log();
   // int pid;
   // pid = checkpoint_fork();
   // if(pid==0){
@@ -83,22 +83,22 @@ initlog(int dev)
 static void
 install_trans(int mode)
 {
-  if(mode == 0){
-    int tail;
-    for (tail = 0; tail < log.lh.n; tail++) {
-      struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-      struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
-      memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-      bwrite(dbuf);  // write dst to disk
-      brelse(lbuf);
-      brelse(dbuf);
-    }
-  } else {
-    acquire(&ck.lock);
-    wakeup(&ck);
-    // sleep(&ck, &ck.lock);
-    release(&ck.lock);  
-  }
+  // if(mode == 0){
+  //   int tail;
+  //   for (tail = 0; tail < log.lh.n; tail++) {
+  //     struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+  //     struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+  //     memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+  //     bwrite(dbuf);  // write dst to disk
+  //     brelse(lbuf);
+  //     brelse(dbuf);
+  //   }
+  // } else {
+  acquire(&ck.lock);
+  wakeup(&ck);
+  // sleep(&ck, &ck.lock);
+  release(&ck.lock);  
+  // }
 }
 
 // Read the log header from disk into the in-memory log header
