@@ -5,6 +5,7 @@
 #include "sleeplock.h"
 #include "fs.h"
 #include "buf.h"
+#include "proc.h"
 #define RECOVER 0  // RECOVER
 #define COMMIT 1  // COMMIT
 
@@ -69,6 +70,7 @@ initlog(int dev)
   log.size = sb.nlog;
   log.dev = dev;
   recover_from_log();
+  checkpointinit((uint)checkpoint);
   // ck = bretrieve();
   // int pid;
   // initlock(ck->lock, "checkpoint");
@@ -90,26 +92,29 @@ static void
 install_trans(int mode)
 {
 
-  int tail;
-  if(mode == RECOVER){
-    for (tail = 0; tail < log.lh.n; tail++) {
-      struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
-      struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-      memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-      bwrite(dbuf);
-      brelse(lbuf);
-      brelse(dbuf);
-    }
-  } else {
-    acquire(ck->lock);
-    ck->n = log.lh.n;
-    ck->block = log.lh.block;
-    ck->start = log.start;
-    ck->dev = log.dev;
-    wakeup(ck);
-    release(ck->lock);  
-    checkpoint();
-  }
+  acquire(ck->lock);
+  wakeup(ck);
+  release(ck->lock);
+  // int tail;
+  // if(mode == RECOVER){
+  //   for (tail = 0; tail < log.lh.n; tail++) {
+  //     struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+  //     struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+  //     memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+  //     bwrite(dbuf);
+  //     brelse(lbuf);
+  //     brelse(dbuf);
+  //   }
+  // } else {
+  //   acquire(ck->lock);
+  //   ck->n = log.lh.n;
+  //   ck->block = log.lh.block;
+  //   ck->start = log.start;
+  //   ck->dev = log.dev;
+  //   wakeup(ck);
+  //   release(ck->lock);  
+  //   checkpoint();
+  // }
 
   // int tail;
   // for (tail = 0; tail < log.lh.n; tail++) {
@@ -293,5 +298,3 @@ checkpoint(void)
     release(ck->lock);
   }
 }
-
-
