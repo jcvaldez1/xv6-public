@@ -78,20 +78,20 @@ initlog(int dev)
 static void
 install_trans(void)
 {
-  acquire(&ck.lock);
-  wakeup(&ck);
-  // sleep(&ck, &ck.lock);
-  release(&ck.lock);
-  // int tail;
+  // acquire(&ck.lock);
+  // wakeup(&ck);
+  // // sleep(&ck, &ck.lock);
+  // release(&ck.lock);
+  int tail;
 
-  // for (tail = 0; tail < log.lh.n; tail++) {
-  //   struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-  //   struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
-  //   memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-  //   bwrite(dbuf);  // write dst to disk
-  //   brelse(lbuf);
-  //   brelse(dbuf);
-  // }
+  for (tail = 0; tail < log.lh.n; tail++) {
+    struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+    struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+    memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+    bwrite(dbuf);  // write dst to disk
+    brelse(lbuf);
+    brelse(dbuf);
+  }
 }
 
 // Read the log header from disk into the in-memory log header
