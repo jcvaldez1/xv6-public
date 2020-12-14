@@ -238,8 +238,8 @@ void
 checkpoint(void)
 {
   for(;;){
-    acquire(&log->lock);
-    sleep(&log, &log->lock);
+    acquire(&log.lock);
+    sleep(&log, &log.lock);
     // begin_op();
     int tail;
     for (tail = 0; tail < log.lh.n; tail++) {
@@ -251,6 +251,6 @@ checkpoint(void)
       brelse(dbuf);
     }
     // end_op();
-    release(&log->lock);
+    release(&log.lock);
   }
 }
