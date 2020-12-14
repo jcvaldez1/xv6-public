@@ -5,7 +5,7 @@
 #include "sleeplock.h"
 #include "fs.h"
 #include "buf.h"
-#include "proc.h"
+// #include "proc.h"
 #define RECOVER 0  // RECOVER
 #define COMMIT 1  // COMMIT
 
