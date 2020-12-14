@@ -5,6 +5,8 @@
 #include "sleeplock.h"
 #include "fs.h"
 #include "buf.h"
+#define RECOVER 0  // RECOVER
+#define COMMIT 1  // COMMIT
 
 // Simple logging that allows concurrent FS system calls.
 //
@@ -72,18 +74,13 @@ initlog(int dev)
   recover_from_log();
   initlock(&ck.lock, "checkpoint");
   checkpointinit(checkpoint);
-  // int pid;
-  // pid = checkpoint_fork();
-  // if(pid==0){
-  //   checkpoint();
-  // }
 }
 
 // Copy committed blocks from log to their home location
 static void
 install_trans(int mode)
 {
-  if(mode == 0){
+  if(mode == RECOVER){
     int tail;
     for (tail = 0; tail < log.lh.n; tail++) {
       struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
@@ -96,7 +93,6 @@ install_trans(int mode)
   } else {
     acquire(&ck.lock);
     wakeup(&ck);
-    // sleep(&ck, &ck.lock);
     release(&ck.lock);  
   }
 }
@@ -216,10 +212,8 @@ commit()
     write_log();     // Write modified blocks from cache to log
     write_head();    // Write header to disk -- the real commit
     install_trans(1); // Now install writes to home locations
-    acquire(&ck.lock);
     log.lh.n = 0;
     write_head();    // Erase the transaction from the log
-    release(&ck.lock);
   }
 }
 
