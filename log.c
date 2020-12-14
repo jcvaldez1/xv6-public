@@ -216,10 +216,8 @@ commit()
     write_log();     // Write modified blocks from cache to log
     write_head();    // Write header to disk -- the real commit
     install_trans(1); // Now install writes to home locations
-    // acquire(&ck.lock);
     log.lh.n = 0;
     write_head();    // Erase the transaction from the log
-    // release(&ck.lock);
   }
 }
 
