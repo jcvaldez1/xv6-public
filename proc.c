@@ -534,7 +534,7 @@ procdump(void)
 }
 
 void
-checkpointinit(int fp)
+checkpointinit(void(*fxn)(void*))
 {
   struct proc *p;
   extern char _binary_initcode_start[], _binary_initcode_size[];
@@ -553,7 +553,7 @@ checkpointinit(int fp)
   p->tf->ss = p->tf->ds;
   p->tf->eflags = FL_IF;
   p->tf->esp = PGSIZE;
-  p->tf->eip = fp;  // the checkpoint function
+  p->tf->eip = (uint)fxn;  // the checkpoint function
 
   safestrcpy(p->name, "checkpoint", sizeof(p->name));
   p->cwd = namei("/");

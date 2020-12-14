@@ -49,6 +49,7 @@ struct log log;
 
 static void recover_from_log(void);
 static void commit();
+void checkpoint();
 
 void
 initlog(int dev)
@@ -63,7 +64,7 @@ initlog(int dev)
   log.size = sb.nlog;
   log.dev = dev;
   recover_from_log();
-  checkpointinit((uint)checkpoint);
+  checkpointinit(checkpoint);
 }
 
 // Copy committed blocks from log to their home location
@@ -233,7 +234,7 @@ log_write(struct buf *b)
   release(&log.lock);
 }
 
-static void
+void
 checkpoint(void)
 {
   for(;;){
