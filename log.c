@@ -80,7 +80,7 @@ install_trans(void)
 {
   acquire(&ck.lock);
   wakeup(&ck);
-  sleep(&ck, &ck.lock);
+  // sleep(&ck, &ck.lock);
   release(&ck.lock);
   // int tail;
 
@@ -262,7 +262,7 @@ checkpoint(void)
       brelse(dbuf);
     }
     // end_op();
-    wakeup(&ck);
+    // wakeup(&ck);
     release(&ck.lock);
   }
 }
