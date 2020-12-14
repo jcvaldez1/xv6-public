@@ -69,9 +69,9 @@ initlog(int dev)
   log.start = sb.logstart;
   log.size = sb.nlog;
   log.dev = dev;
+  recover_from_log();
   initlock(&ck.lock, "checkpoint");
   checkpointinit(checkpoint);
-  recover_from_log();
 }
 
 // Copy committed blocks from log to their home location
