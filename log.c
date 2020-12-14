@@ -94,9 +94,10 @@ install_trans(int mode)
   //     brelse(dbuf);
   //   }
   // } else {
-  acquire(&ck.lock);
-  wakeup(&ck);
-  release(&ck.lock);  
+    acquire(&ck.lock);
+    wakeup(&ck);
+    // sleep(&ck, &ck.lock);
+    release(&ck.lock);  
   // }
 }
 
@@ -257,7 +258,6 @@ checkpoint(void)
   for(;;){
     acquire(&ck.lock);
     sleep(&ck, &ck.lock);
-    begin_op();
     int tail;
     tail = 0;
     for (tail = 0; tail < log.lh.n; tail++) {
@@ -268,7 +268,6 @@ checkpoint(void)
       brelse(lbuf);
       brelse(dbuf);
     }
-    end_op();
     release(&ck.lock);
   }
 }
