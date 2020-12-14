@@ -121,6 +121,7 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 void			checkpointinit(void(*)(void*));
+int 			checkpoint_fork(void);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

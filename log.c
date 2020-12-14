@@ -71,7 +71,12 @@ initlog(int dev)
   log.dev = dev;
   recover_from_log();
   initlock(&ck.lock, "checkpoint");
-  checkpointinit(checkpoint);
+  // checkpointinit(checkpoint);
+  int pid;
+  pid = checkpoint_fork();
+  if(pid==0){
+    checkpoint();
+  }
 }
 
 // Copy committed blocks from log to their home location
