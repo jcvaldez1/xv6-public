@@ -96,7 +96,7 @@ install_trans(int mode)
   // } else {
   acquire(&ck.lock);
   wakeup(&ck);
-  // sleep(&ck, &ck.lock);
+  sleep(&ck, &ck.lock);
   release(&ck.lock);  
   // }
 }
@@ -268,6 +268,7 @@ checkpoint(void)
       brelse(lbuf);
       brelse(dbuf);
     }
+    wakeup(&ck);
     release(&ck.lock);
   }
 }
