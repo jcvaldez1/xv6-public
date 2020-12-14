@@ -47,6 +47,12 @@ struct log {
 };
 struct log log;
 
+struct checkpointlock {
+  struct spinlock lock;
+};
+
+struct checkpointlock ck;
+
 static void recover_from_log(void);
 static void commit();
 void checkpoint();
@@ -64,6 +70,7 @@ initlog(int dev)
   log.size = sb.nlog;
   log.dev = dev;
   recover_from_log();
+  initlock(&ck.lock, "checkpoint");
   checkpointinit(checkpoint);
 }
 
@@ -71,16 +78,20 @@ initlog(int dev)
 static void
 install_trans(void)
 {
-  int tail;
+  acquire(&ck.lock);
+  wakeup(&ck);
+  sleep(&ck, &ck.lock);
+  release(&ck.lock);
+  // int tail;
 
-  for (tail = 0; tail < log.lh.n; tail++) {
-    struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
-    struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
-    memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
-    bwrite(dbuf);  // write dst to disk
-    brelse(lbuf);
-    brelse(dbuf);
-  }
+  // for (tail = 0; tail < log.lh.n; tail++) {
+  //   struct buf *lbuf = bread(log.dev, log.start+tail+1); // read log block
+  //   struct buf *dbuf = bread(log.dev, log.lh.block[tail]); // read dst
+  //   memmove(dbuf->data, lbuf->data, BSIZE);  // copy block to dst
+  //   bwrite(dbuf);  // write dst to disk
+  //   brelse(lbuf);
+  //   brelse(dbuf);
+  // }
 }
 
 // Read the log header from disk into the in-memory log header
@@ -238,8 +249,8 @@ void
 checkpoint(void)
 {
   for(;;){
-    acquire(&log.lock);
-    sleep(&log, &log.lock);
+    acquire(&ck.lock);
+    sleep(&ck, &ck.lock);
     // begin_op();
     int tail;
     for (tail = 0; tail < log.lh.n; tail++) {
@@ -251,6 +262,7 @@ checkpoint(void)
       brelse(dbuf);
     }
     // end_op();
-    release(&log.lock);
+    wakeup(&ck);
+    release(&ck.lock);
   }
 }
